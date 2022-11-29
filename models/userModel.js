@@ -30,7 +30,7 @@ const userSchema = mongoose.Schema({
         type: String,
         default : "+91"
     },
-    phone: {
+    bio: {
         type: String,
         default : "bio",
         maxLength: [250, "Bio too long"]

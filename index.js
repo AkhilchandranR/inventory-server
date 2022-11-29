@@ -15,6 +15,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended:false }));
 app.use(bodyParser.json());
+app.use(cors({ origin:true, credentials:true }));
 
 app.get('/', (req,res)=>{
     res.send("HomePage");
@@ -35,3 +36,4 @@ mongoose.connect(process.env.MONGO_URI)
 
 
 app.listen(PORT, ()=>console.log(`Server started at port ${PORT}`));
+
