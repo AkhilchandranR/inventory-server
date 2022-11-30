@@ -110,7 +110,97 @@ const loginUser = asyncHandler(async(req,res) =>{
 
 })
 
+//logout user
+const logout = asyncHandler(async(req,res) =>{
+
+    res.cookie("token","", {
+        path:"/",
+        // httpOnly:true,
+        expires: new Date(0), // current second
+        // sameSite: "none",
+        // secure: true
+    });
+
+    return res.status(200).json({
+        message : "Successfully logged out"
+    })
+
+})
+
+//get user data
+const getUser = asyncHandler(async(req,res)=>{
+    const user = await User.findById(req.user._id);
+
+    if(user){
+        res.status(200).json({
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            photo: user.photo,
+            phone: user.phone,
+            bio: user.bio,
+        })
+    }else{
+        res.status(400);
+        throw new Error("User not found");
+    }
+})
+
+//get login status
+const loginStatus = asyncHandler(async(req,res)=>{
+    const token = req.cookies.token;
+    if(!token){
+        return res.json(false);
+    }
+
+    const verified = jwt.verify(token, process.env.JWT_SECRET);
+    if(verified){
+        return res.json(true);
+    }
+
+    return res.json(false);
+})
+
+//updateuser
+const updateUser = asyncHandler(async(req,res)=>{
+
+    const user = await User.findById(req.user._id);
+    if(user){
+        const { name, email, photo, phone, bio} = user;
+        user.email = email;
+        user.name = req.body.name || name;
+        user.phone = req.body.phone || phone;
+        user.bio = req.body.bio || bio;
+        user.photo = req.body.photo || photo;
+
+        const updatedUser = await user.save();
+
+        res.status(200).json({
+            id : updatedUser._id,
+            name: updatedUser.name,
+            email : updatedUser.email,
+            phone : updatedUser.phone,
+            bio: updatedUser.bio,
+            photo : updatedUser.photo
+        })
+    }
+    else{
+        res.status(404);
+        throw new Error("user not found");
+    }
+})
+
+const changePassword = asyncHandler(async(req,res)=>{
+    
+})
+
+
 module.exports = {
     registerUser : registerUser,
-    loginUser : loginUser
+    loginUser : loginUser,
+    logout: logout,
+    getUser : getUser,
+    loginStatus : loginStatus,
+    updateUser : updateUser,
+    changePassword : changePassword
 }
