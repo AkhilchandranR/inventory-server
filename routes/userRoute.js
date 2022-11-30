@@ -12,6 +12,6 @@ router.get('/logout' , logout);
 router.get('/getUser' ,protect, getUser);
 router.get('/loggedin' , loginStatus);
 router.patch('/updateuser' , protect,updateUser);
-router.patch('/updatepassword', changePassword);
+router.patch('/updatepassword', protect,changePassword);
 
 module.exports = router;
