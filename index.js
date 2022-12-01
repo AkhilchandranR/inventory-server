@@ -27,7 +27,7 @@ app.use("/api/users", userRoute);
 
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 mongoose.connect(process.env.MONGO_URI)
         .then(()=>{console.log("Db started")})
