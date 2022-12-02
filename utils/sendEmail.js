@@ -1,6 +1,6 @@
 const nodeMailer = require('nodemailer');
 
-const sendEmail = async(subject, mesage, send_to, send_from,reply_to)=>{
+const sendEmail = async(subject, message, send_to, send_from,reply_to)=>{
     const transporter = nodeMailer.createTransport({
         host: process.env.EMAIL_HOST,
         port:587,

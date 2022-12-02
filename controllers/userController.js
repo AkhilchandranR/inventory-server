@@ -230,6 +230,12 @@ const forgotPassword = asyncHandler(async(req,res)=>{
         throw new Error("User not found");
     }
 
+    //delete token if already exists
+    let token = await Token.findOne({userId: user._id});
+    if(token){
+        await token.deleteOne()
+    }
+
     let resetToken = crypto.randomBytes(32).toString("hex") + user._id;
 
     //hash the token before saving it to db
@@ -248,7 +254,7 @@ const forgotPassword = asyncHandler(async(req,res)=>{
     const resetUrl = `${process.env.FRONTEND_URL}/resetpassword/${resetToken}`;
 
     //reset email
-    const message = `
+    const msg = `
     <h2>Hello ${user.name}</h2>
     <p>Please use your url below to reset your password</p>
     <p>This reset link is valid only for 30 minutes</p>
@@ -264,7 +270,7 @@ const forgotPassword = asyncHandler(async(req,res)=>{
     const send_from = process.env.EMAIL_USER;
 
     try{
-        await sendEmail(subject,message,send_to,send_from);
+        await sendEmail(subject,msg,send_to,send_from);
         res.status(200).json({
             success: true,
             message: "Reset email send"
@@ -273,6 +279,34 @@ const forgotPassword = asyncHandler(async(req,res)=>{
         res.status(500);
         throw new Error("Email not send");
     }
+})
+
+const resetPassword = asyncHandler(async(req,res)=>{
+    const {password} = req.body;
+    const {resetToken} = req.params;
+
+    const hashedToken = crypto.createHash("sha256")
+    .update(resetToken).digest("hex");
+
+    //compare to the token in the database
+    const userToken = await Token.findOne({
+        token: hashedToken,
+        expiresAt: {$gt: Date.now()}
+    })
+
+    if(!userToken){
+        res.status(404);
+        throw new Error("Invalid or expired token");
+    }
+
+    //find user
+    const user = await User.findOne({_id:userToken.userId});
+    user.password = password;
+    await user.save();
+    res.status(200).json({
+        message : "Password reset successfull"
+    });
+
 })
 
 
@@ -284,5 +318,6 @@ module.exports = {
     loginStatus : loginStatus,
     updateUser : updateUser,
     changePassword : changePassword,
-    forgotPassword : forgotPassword
+    forgotPassword : forgotPassword,
+    resetPassword : resetPassword
 }
